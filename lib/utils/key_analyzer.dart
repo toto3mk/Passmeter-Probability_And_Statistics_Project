@@ -1,12 +1,9 @@
-// lib/utils/key_analyzer.dart
-// Lightweight password analyzer used by the app.
-// Estimates entropy, rating and crack times (GPU & CPU).
+
 
 
 import 'dart:math';
 
 class KeyAnalyzer {
-  // Rating labels and color hex (as Flutter `Color` hex string)
   static const Map<String, String> _judgmentColors = {
     "UNBREAKABLE": "0xFF00C853", // bright green
     "VERY STRONG": "0xFF8BC34A",
@@ -16,15 +13,7 @@ class KeyAnalyzer {
     "VOID": "0xFF757575",
   };
 
-  /// Analyze the provided [password].
-  ///
-  /// Returns a map with:
-  /// - length: int
-  /// - entropy_bits: String (2 decimal places)
-  /// - rating: String
-  /// - crack_time_gpu_formatted: String
-  /// - crack_time_cpu_formatted: String
-  /// - color_hex: String (e.g. "0xFF00C853")
+  
   static Map<String, dynamic> analyzeKeyStrength(String password) {
     if (password.isEmpty) return _getVoidResult();
 
