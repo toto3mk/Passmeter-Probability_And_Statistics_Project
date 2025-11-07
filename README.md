@@ -103,9 +103,9 @@ void main() {
 
 ## Security Notes
 
-- 🔒 **No data leaves your device** - all analysis happens locally
-- ⚡ **Real-time analysis** - instant feedback as users type
-- 📱 **Framework agnostic** - works with Flutter, Dart web, and server-side
+- **No data leaves your device** - all analysis happens locally
+- **Real-time analysis** - instant feedback as users type
+- **Framework agnostic** - works with Flutter, Dart web, and server-side
 
 ## Best Practices
 
@@ -125,10 +125,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
 
-**⭐ Star this repo if you found it helpful!**
+
