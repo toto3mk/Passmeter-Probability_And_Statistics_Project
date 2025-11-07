@@ -19,6 +19,47 @@ It provides a clean UI, evaluates password complexity in real time, and helps us
 -  Distributable as **AppImage** for easy installation on any Linux distro
 
 ---
+## How It Works
+
+The analyzer uses information theory to calculate password strength:
+
+### Entropy Formula
+```
+H = L × log₂(C)
+```
+Where:
+- **H** = Entropy (bits)
+- **L** = Password length
+- **C** = Character set size
+
+### Character Sets
+- **Lowercase letters**: 26 characters
+- **Uppercase letters**: 26 characters  
+- **Digits**: 10 characters
+- **Symbols**: 32 special characters
+
+### Strength Ratings
+| Rating | Entropy Range | Color | Description |
+|--------|---------------|-------|-------------|
+| 🟢 UNBREAKABLE | 128+ bits | Green | Virtually uncrackable |
+| 🟡 EXTREMELY STRONG | 96-127 bits | Light Green | Extremely secure |
+| 🟡 VERY STRONG | 80-95 bits | Amber | Very secure |
+| 🟠 MODERATE | 64-79 bits | Orange | Reasonably secure |
+| 🔴 WEAK | <64 bits | Red | Easily crackable |
+| ⚫ VOID | 0 bits | Grey | Empty password |
+
+---
+## Examples
+
+| Password | Length | Charset | Entropy | Rating |
+|----------|--------|---------|---------|---------|
+| `password` | 8 | 26 | 37.60 bits | 🔴 VERY WEAK |
+| `Password123` | 11 | 62 | 65.50 bits | 🟠 WEAK |
+| `P@ssw0rd!2024` | 13 | 94 | 85.21 bits | 🟡 MODERATE|
+| `CorrectHorseBatteryStaple` | 25 | 26 | 117.70 bits | 🟡 VERY STRONG |
+| `V3ry$3cur3&P@ssw0rd!L0ng#` | 24 | 94 | 157.34 bits | 🟢 UNBREAKABLE |
+
+---
 
 ## Requirements
 
