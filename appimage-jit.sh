@@ -2,78 +2,65 @@
 
 set -e
 
-echo "Building Password Analyzer AppImage (JIT Mode)..."
+APP_NAME="PasswordAnalyzer"
+BINARY_NAME="passmeter"
+
+APP_DIR="${APP_NAME}.AppDir"
+APPIMAGE_NAME="${APP_NAME}-x86_64.AppImage"
+
+echo "🔧 Building $APP_NAME AppImage (JIT Mode)..."
 
 # Clean up
-rm -rf PasswordAnalyzer.AppDir Password_Strength_Analyzer-x86_64.AppImage
+rm -rf "$APP_DIR" "$APPIMAGE_NAME"
 
-# Build in debug mode (JIT) instead of release (AOT)
-echo "Step 1: Building Flutter application in debug mode..."
+# Step 1: Build Flutter Linux app (debug JIT mode)
+echo "🚧 Step 1: Building Flutter application in debug mode..."
 flutter build linux --debug
 
-# Create AppDir structure
-echo "Step 2: Creating AppDir structure..."
-mkdir -p PasswordAnalyzer.AppDir/usr/bin
-mkdir -p PasswordAnalyzer.AppDir/usr/lib
-mkdir -p PasswordAnalyzer.AppDir/usr/share/icons/hicolor/256x256/apps
-mkdir -p PasswordAnalyzer.AppDir/usr/share/applications
+# Step 2: Create AppDir structure
+echo "📁 Step 2: Creating AppDir structure..."
+mkdir -p "$APP_DIR/usr/bin"
+mkdir -p "$APP_DIR/usr/lib"
+mkdir -p "$APP_DIR/usr/share/icons/hicolor/256x256/apps"
+mkdir -p "$APP_DIR/usr/share/applications"
 
-# Copy ALL files from debug build - FIXED PATH
-echo "Step 3: Copying application files..."
-cp -r build/linux/x64/debug/bundle/* PasswordAnalyzer.AppDir/
+# Step 3: Copy Flutter build output
+echo "📦 Step 3: Copying build output..."
+cp -r build/linux/x64/debug/bundle/* "$APP_DIR/usr/bin/"
 
-# Move the binary to the correct location and make executable
-echo "Step 4: Setting up binary..."
-if [ -f "PasswordAnalyzer.AppDir/passmeter" ]; then
-    mv PasswordAnalyzer.AppDir/passmeter PasswordAnalyzer.AppDir/usr/bin/
-    chmod +x PasswordAnalyzer.AppDir/usr/bin/passmeter
-else
-    echo "❌ Error: passmeter binary not found!"
-    echo "Contents of debug bundle:"
-    ls -la build/linux/x64/debug/bundle/
+# Step 4: Verify binary
+if [ ! -f "$APP_DIR/usr/bin/$BINARY_NAME" ]; then
+    echo "❌ Error: Binary not found at $APP_DIR/usr/bin/$BINARY_NAME"
+    echo "Check your binary name. Listing available files:"
+    ls -la "$APP_DIR/usr/bin"
     exit 1
 fi
+chmod +x "$APP_DIR/usr/bin/$BINARY_NAME"
 
-# Move libraries if they exist
-if [ -d "PasswordAnalyzer.AppDir/lib" ]; then
-    mv PasswordAnalyzer.AppDir/lib/* PasswordAnalyzer.AppDir/usr/lib/ 2>/dev/null || true
-    rmdir PasswordAnalyzer.AppDir/lib 2>/dev/null || true
-fi
-
-# Move data if it exists
-if [ -d "PasswordAnalyzer.AppDir/data" ]; then
-    mv PasswordAnalyzer.AppDir/data PasswordAnalyzer.AppDir/usr/share/ 2>/dev/null || true
-fi
-
-# Create AppRun for JIT mode
-echo "Step 5: Creating AppRun..."
-cat > PasswordAnalyzer.AppDir/AppRun << 'EOF'
+# Step 5: Create AppRun
+echo "⚙️ Step 5: Creating AppRun..."
+cat > "$APP_DIR/AppRun" <<EOF
 #!/bin/bash
-
-HERE="$(dirname "$(readlink -f "${0}")")"
-
-# Set environment variables
-export PATH="${HERE}/usr/bin:${PATH}"
-export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
-export XDG_DATA_DIRS="${HERE}/usr/share:${XDG_DATA_DIRS}"
-
-# Run in JIT mode
-cd "${HERE}"
-exec "./usr/bin/passmeter" "$@"
+HERE="\$(dirname "\$(readlink -f "\${0}")")"
+export PATH="\${HERE}/usr/bin:\${PATH}"
+export LD_LIBRARY_PATH="\${HERE}/usr/lib:\${LD_LIBRARY_PATH}"
+export XDG_DATA_DIRS="\${HERE}/usr/share:\${XDG_DATA_DIRS}"
+cd "\${HERE}/usr/bin"
+exec "./$BINARY_NAME" "\$@"
 EOF
-chmod +x PasswordAnalyzer.AppDir/AppRun
+chmod +x "$APP_DIR/AppRun"
 
-# Create desktop file
-echo "Step 6: Creating desktop file..."
-cat > PasswordAnalyzer.AppDir/passmeter.desktop << EOF
+# Step 6: Desktop entry
+echo "🖥️ Step 6: Creating desktop entry..."
+cat > "$APP_DIR/$BINARY_NAME.desktop" <<EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
 Name=Password Strength Analyzer
 GenericName=Password Security Tool
 Comment=Analyze and evaluate password strength using entropy calculation
-Exec=passmeter
-Icon=passmeter
+Exec=$BINARY_NAME
+Icon=$BINARY_NAME
 Terminal=false
 Categories=Utility;Security;
 Keywords=password;security;analyzer;entropy;
@@ -81,19 +68,27 @@ StartupNotify=true
 X-AppImage-Version=1.0.0
 EOF
 
-# Create icon
-echo "Step 7: Creating icon..."
-if command -v convert &> /dev/null; then
-    convert -size 256x256 xc:#2196F3 -fill white -pointsize 80 -gravity center -annotate +0+0 "🔐" PasswordAnalyzer.AppDir/passmeter.png
+# Step 7: Icon
+echo "🎨 Step 7: Creating icon..."
+ICON_PATH="$APP_DIR/usr/share/icons/hicolor/256x256/apps/$BINARY_NAME.png"
+if command -v convert &>/dev/null; then
+    convert -size 256x256 xc:#2196F3 -fill white -pointsize 80 -gravity center -annotate +0+0 "🔐" "$ICON_PATH"
 else
-    echo "Creating placeholder icon..."
-    echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" | base64 -d > PasswordAnalyzer.AppDir/passmeter.png
+    echo "Using base64 fallback icon..."
+    echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" | base64 -d > "$ICON_PATH"
 fi
-cp PasswordAnalyzer.AppDir/passmeter.png PasswordAnalyzer.AppDir/usr/share/icons/hicolor/256x256/apps/
 
-# Build AppImage
-echo "Step 8: Building AppImage..."
-./appimagetool-x86_64.AppImage PasswordAnalyzer.AppDir
+# Step 8: Build AppImage
+echo "📦 Step 8: Building AppImage..."
+if [ ! -f "./appimagetool-x86_64.AppImage" ]; then
+    echo "❌ appimagetool-x86_64.AppImage not found in current directory!"
+    echo "Download it from: https://github.com/AppImage/AppImageKit/releases"
+    exit 1
+fi
 
-echo "✅ AppImage built successfully!"
-find . -maxdepth 1 -name "*.AppImage" -type f -exec ls -la {} \;
+chmod +x ./appimagetool-x86_64.AppImage
+./appimagetool-x86_64.AppImage "$APP_DIR" "$APPIMAGE_NAME"
+
+echo "✅ AppImage built successfully: $APPIMAGE_NAME"
+ls -lh "$APPIMAGE_NAME"
+

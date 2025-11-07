@@ -10,8 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    
   google_fonts: ^6.1.0
   cupertino_icons: ^1.0.8
+  zxcvbn: ^1.0.0 
 
 dev_dependencies:
   flutter_launcher_icons: "^0.14.4"

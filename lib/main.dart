@@ -1,196 +1,164 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'utils/key_analyzer.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
+  runApp(PasswordAnalyzerApp());
+}
+
+class PasswordAnalyzerApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       title: 'Password Analyzer',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
-        primaryColor: Color(0xFFE64A19),
         scaffoldBackgroundColor: Color(0xFF121212),
-        textTheme: GoogleFonts.robotoMonoTextTheme().copyWith(
-          bodyMedium: TextStyle(color: Colors.white70),
-          bodyLarge: TextStyle(color: Colors.white),
-          headlineSmall: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFFFF5722)),
-          ),
-          labelStyle: GoogleFonts.robotoMono(color: Colors.white54),
-        ),
-        appBarTheme: AppBarTheme(
-          titleTextStyle: GoogleFonts.orbitron(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        primaryColor: Color(0xFFE64A19),
+        textTheme: GoogleFonts.robotoMonoTextTheme(ThemeData.dark().textTheme),
       ),
-      home: AnalysisScreen(),
-    ),
-  );
+      home: PasswordAnalyzerScreen(),
+    );
+  }
 }
 
-class AnalysisScreen extends StatefulWidget {
+class PasswordAnalyzerScreen extends StatefulWidget {
   @override
-  _AnalysisScreenState createState() => _AnalysisScreenState();
+  _PasswordAnalyzerScreenState createState() => _PasswordAnalyzerScreenState();
 }
 
-class _AnalysisScreenState extends State<AnalysisScreen> {
-  final TextEditingController _controller = TextEditingController();
-  Map<String, dynamic> _analysisResults = {};
+class _PasswordAnalyzerScreenState extends State<PasswordAnalyzerScreen> {
+  final _controller = TextEditingController();
+  Map<String, dynamic> _result = KeyAnalyzer.analyzeKeyStrength("");
 
-  @override
-  void initState() {
-    super.initState();
-    _analysisResults = KeyAnalyzer.analyzeKeyStrength("");
+  // NEW: whether the password is obscured (hidden)
+  bool _obscure = true;
+
+  void _onChanged(String value) {
+    setState(() {
+      _result = KeyAnalyzer.analyzeKeyStrength(value);
+    });
   }
 
-  void _runAnalysis(String password) {
-    setState(() {
-      _analysisResults = KeyAnalyzer.analyzeKeyStrength(password);
-    });
+  Color _colorFromHex(String hex) {
+    // hex like "0xFF00C853"
+    return Color(int.parse(hex));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _infoTile(String title, String value) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      margin: EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white10,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Expanded(child: Text(title, style: TextStyle(color: Colors.white70))),
+          Text(value, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    Color ratingColor = Color(
-      int.parse(_analysisResults['color_hex'].toString()),
-    );
-    String ratingText = _analysisResults['rating'].toString();
+    final rating = _result['rating'] as String;
+    final color = _colorFromHex(_result['color_hex'] as String);
+
+    final entropy = double.tryParse(_result['entropy_bits']?.toString() ?? "0") ?? 0.0;
+    final progress = (entropy / 128.0).clamp(0.0, 1.0);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Password Analyzer - Taha', style: GoogleFonts.exo2()),
-        backgroundColor: Color(0xFF212121),
+        title: Text('Password Analyzer', style: TextStyle(fontWeight: FontWeight.w600)),
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
+          children: [
             TextField(
               controller: _controller,
-              onChanged: _runAnalysis,
-              style: GoogleFonts.exo2(fontSize: 18.0),
+              onChanged: _onChanged,
+              obscureText: _obscure, 
               decoration: InputDecoration(
-                labelText: 'Enter The Password To Analyze',
-                labelStyle: GoogleFonts.exo2(color: Colors.white54),
-                border: OutlineInputBorder(),
+                hintText: 'Type a password to analyze',
+                hintStyle: TextStyle(color: Colors.white38),
+                filled: true,
+                fillColor: Colors.white10,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                 suffixIcon: IconButton(
-                  icon: Icon(Icons.clear, color: Colors.white54),
                   onPressed: () {
-                    _controller.clear();
-                    _runAnalysis("");
+                    setState(() {
+                      _obscure = !_obscure;
+                    });
                   },
+                  tooltip: _obscure ? 'Show password' : 'Hide password',
+                  icon: Icon(
+                    _obscure ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.white70,
+                  ),
                 ),
               ),
+              style: TextStyle(fontSize: 16, letterSpacing: 1.0),
             ),
-
-            SizedBox(height: 30),
-
-            Text(
-              'Analysis Report',
-              style: GoogleFonts.exo2(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: const Color.fromARGB(255, 34, 255, 0),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            Divider(color: Colors.white30, height: 20),
-
-            _buildInfoRow(
-              'Key Length',
-              '${_analysisResults['length']} characters',
-            ),
-            _buildInfoRow(
-              'Charset Size (C)',
-              '${_analysisResults['charset_size']} unique chars',
-            ),
-            _buildInfoRow(
-              'Entropy (H)',
-              '${_analysisResults['entropy_bits']} bits',
-            ),
-
-            SizedBox(height: 15),
-
-            Text(
-              'GPU Crack Estimated:',
-              style: GoogleFonts.rajdhani(
-                // Clean tech font
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              '${_analysisResults['years_to_crack_gpu_estimate']} years',
-              style: GoogleFonts.rajdhani(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.amber,
-              ),
-            ),
-
-            SizedBox(height: 25),
-
-            Text(
-              ' Password Strength Rating ',
-              textAlign: TextAlign.center,
-
-              style: GoogleFonts.exo2(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 10),
-            Container(
-              padding: EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: ratingColor.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: ratingColor, width: 2),
-              ),
-              child: Text(
-                ratingText,
-                style: GoogleFonts.orbitron(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: ratingColor,
+            SizedBox(height: 18),
+            // Strength bar + label
+            Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      minHeight: 16,
+                      value: progress,
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                      backgroundColor: Colors.white12,
+                    ),
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
+                SizedBox(width: 12),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    rating,
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                )
+              ],
             ),
+            SizedBox(height: 18),
+            // Tiles
+            _infoTile('Length', (_result['length'] ?? 0).toString()),
+            _infoTile('Entropy (bits)', _result['entropy_bits']?.toString() ?? '0.00'),
+            _infoTile('Crack time (GPU)', _result['crack_time_gpu_formatted'] ?? 'N/A'),
+            _infoTile('Crack time (CPU)', _result['crack_time_cpu_formatted'] ?? 'N/A'),
+            SizedBox(height: 12),
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Text(
+                  'Tip: increase length and add mixed character classes (upper, lower, digits, symbols). Avoid repeated or sequential characters',
+                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            )
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(
-            label,
-            style: GoogleFonts.robotoMono(fontSize: 16, color: Colors.white70),
-          ),
-          Text(
-            value,
-            style: GoogleFonts.robotoMono(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -1,6 +1,13 @@
 [Desktop Entry]
-Name=Password Analyzer
+Version=1.0
+Type=Application
+Name=Password Strength Analyzer
+GenericName=Password Security Tool
+Comment=Analyze and evaluate password strength using entropy calculation
 Exec=passmeter
 Icon=passmeter
-Type=Application
-Categories=Utility;
+Terminal=false
+Categories=Utility;Security;
+Keywords=password;security;analyzer;entropy;
+StartupNotify=true
+X-AppImage-Version=1.0.0
