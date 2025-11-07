@@ -1,8 +1,8 @@
-# 🔐 Password Strength Analyzer
+# Password Strength Analyzer
 
 A Dart library for analyzing password strength using entropy calculation and modern cryptographic principles. This tool provides detailed metrics to help users create secure passwords.
 
-## 📊 Features
+## Features
 
 - **Entropy Calculation**: Measures password complexity in bits
 - **Crack Time Estimation**: Estimates time required to brute-force the password
@@ -10,7 +10,7 @@ A Dart library for analyzing password strength using entropy calculation and mod
 - **Character Set Analysis**: Detects usage of uppercase, lowercase, digits, and symbols
 - **Visual Feedback**: Color-coded ratings for easy interpretation
 
-## 🧮 How It Works
+## How It Works
 
 The analyzer uses information theory to calculate password strength:
 
@@ -39,7 +39,7 @@ Where:
 | 🔴 WEAK | <64 bits | Red | Easily crackable |
 | ⚫ VOID | 0 bits | Grey | Empty password |
 
-## 🚀 Installation
+## Installation
 
 Add to your `pubspec.yaml`:
 
@@ -48,7 +48,7 @@ dependencies:
   password_strength_analyzer: ^1.0.0
 ```
 
-## 💻 Usage
+## Usage
 
 ```dart
 import 'package:password_strength_analyzer/key_analyzer.dart';
@@ -79,7 +79,7 @@ void main() {
 }
 ```
 
-## 📈 Examples
+## Examples
 
 | Password | Length | Charset | Entropy | Rating |
 |----------|--------|---------|---------|---------|
@@ -101,13 +101,13 @@ void main() {
 !@#$%^&*()-_+=[]{}|;:,.<>?~/\\\"'`
 ```
 
-## 🛡️ Security Notes
+## Security Notes
 
 - 🔒 **No data leaves your device** - all analysis happens locally
 - ⚡ **Real-time analysis** - instant feedback as users type
 - 📱 **Framework agnostic** - works with Flutter, Dart web, and server-side
 
-## 🎯 Best Practices
+## Best Practices
 
 1. **Length Matters**: Aim for at least 12-16 characters
 2. **Character Variety**: Mix uppercase, lowercase, numbers, and symbols
@@ -115,7 +115,7 @@ void main() {
 4. **Unique Passwords**: Use different passwords for different services
 5. **Consider Passphrases**: Long, memorable phrases can be very secure
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -125,16 +125,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
 
-- Based on NIST Special Publication 800-63B Digital Identity Guidelines
-- Inspired by modern password strength estimation techniques
-- Thanks to the Dart community for excellent tooling
-
----
 
 **⭐ Star this repo if you found it helpful!**
