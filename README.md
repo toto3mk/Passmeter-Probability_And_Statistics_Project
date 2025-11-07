@@ -89,7 +89,7 @@ void main() {
 | `CorrectHorseBatteryStaple` | 25 | 26 | 117.70 bits | 🟡 EXTREMELY STRONG |
 | `V3ry$3cur3&P@ssw0rd!L0ng#` | 24 | 94 | 157.34 bits | 🟢 UNBREAKABLE |
 
-## 🔧 Technical Details
+## Technical Details
 
 ### Crack Time Calculation
 - **Assumption**: 1 trillion guesses per second (modern GPU clusters)
