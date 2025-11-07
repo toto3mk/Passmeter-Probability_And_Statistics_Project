@@ -53,10 +53,10 @@ Where:
 
 | Password | Length | Charset | Entropy | Rating |
 |----------|--------|---------|---------|---------|
-| `password` | 8 | 26 | 37.60 bits | 🔴 VERY WEAK |
-| `Password123` | 11 | 62 | 65.50 bits | 🟠 WEAK |
-| `P@ssw0rd!2024` | 13 | 94 | 85.21 bits | 🟡 MODERATE|
-| `CorrectHorseBatteryStaple` | 25 | 26 | 117.70 bits | 🟡 VERY STRONG |
+| `password` | 8 | 26 | 37.60 bits | 🔴 WEAK |
+| `Password123` | 11 | 62 | 65.50 bits | 🟠 MODERATE |
+| `P@ssw0rd!2024` | 13 | 94 | 85.21 bits | 🟡 VERY STRONG|
+| `CorrectHorseBatteryStaple` | 25 | 26 | 117.70 bits | 🟡 EXTREMELY STRONG |
 | `V3ry$3cur3&P@ssw0rd!L0ng#` | 24 | 94 | 157.34 bits | 🟢 UNBREAKABLE |
 
 ---
