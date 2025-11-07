@@ -1,0 +1,32 @@
+name: passmeter
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.1.0
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_launcher_icons: "^0.14.4"
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+# MOVE flutter_icons to root level (same indentation as dev_dependencies)
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo/icon.png"
+  
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logo/
