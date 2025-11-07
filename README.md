@@ -2,7 +2,7 @@
 
 
 
-````markdown
+
 #  Password Strength Analyzer (Passmeter)
 
 A cross-platform **Flutter desktop app** that analyzes password strength using entropy-based metrics.  
@@ -152,10 +152,3 @@ passmeter/
 
 
 
-```
-
----
-
-Would you like me to add **badges** (e.g. Flutter version, build status, platform support) and **AppImage download instructions** for GitHub Releases?  
-That makes your repo look more professional on GitHub.
-```
