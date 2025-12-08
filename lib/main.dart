@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart'; // REQUIRED PACKAGE
 import 'utils/key_analyzer.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:io' show Platform;
 
 void main() {
   runApp(PasswordAnalyzerApp());
@@ -17,10 +19,110 @@ class PasswordAnalyzerApp extends StatelessWidget {
         primaryColor: Color(0xFFE64A19),
         textTheme: GoogleFonts.robotoMonoTextTheme(ThemeData.dark().textTheme),
       ),
-      home: PasswordAnalyzerScreen(),
+      home: BiometricLockScreen(), // CORRECTED: Starts with the lock screen
     );
   }
 }
+
+// =======================================================
+// BIOMETRIC LOCK SCREEN IMPLEMENTATION
+// =======================================================
+
+class BiometricLockScreen extends StatefulWidget {
+  @override
+  _BiometricLockScreenState createState() => _BiometricLockScreenState();
+}
+
+class _BiometricLockScreenState extends State<BiometricLockScreen> {
+  final LocalAuthentication auth = LocalAuthentication();
+  bool _isAuthenticated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start authentication immediately when the screen loads
+    _authenticate();
+  }
+
+  Future<void> _authenticate() async {
+    bool authenticated = false;
+    try {
+      authenticated = await auth.authenticate(
+        localizedReason: 'Scan your finger or face to access the password analyzer.',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true, // Uses any strong biometric (Fingerprint, Face, etc.)
+        ),
+      );
+    } catch (e) {
+      print("Authentication error: $e");
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _isAuthenticated = authenticated;
+    });
+
+    if (!_isAuthenticated) {
+      // Show failure message if authentication is required but failed
+      Future.delayed(Duration(milliseconds: 500), () {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              Platform.isAndroid || Platform.isIOS 
+                ? "Authentication failed or biometrics not available."
+                : "Biometrics not supported on this platform.",
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isAuthenticated) {
+      // If authenticated, show the main app screen
+      return PasswordAnalyzerScreen();
+    } else {
+      // If not authenticated, show a locked splash screen
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock_rounded, size: 80, color: Colors.white70),
+              SizedBox(height: 20),
+              Text(
+                'Access Locked',
+                style: GoogleFonts.robotoMono(fontSize: 24, color: Colors.white),
+              ),
+              SizedBox(height: 40),
+              ElevatedButton.icon(
+                onPressed: _authenticate,
+                icon: Icon(Icons.fingerprint),
+                label: Text('RETRY AUTHENTICATION'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFE64A19),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+}
+
+// =======================================================
+// PASSWORD ANALYZER SCREEN (Uses original logic)
+// =======================================================
 
 class PasswordAnalyzerScreen extends StatefulWidget {
   @override
@@ -31,7 +133,6 @@ class _PasswordAnalyzerScreenState extends State<PasswordAnalyzerScreen> {
   final _controller = TextEditingController();
   Map<String, dynamic> _result = KeyAnalyzer.analyzeKeyStrength("");
 
-  // NEW: whether the password is obscured (hidden)
   bool _obscure = true;
 
   void _onChanged(String value) {
@@ -41,7 +142,6 @@ class _PasswordAnalyzerScreenState extends State<PasswordAnalyzerScreen> {
   }
 
   Color _colorFromHex(String hex) {
-    // hex like "0xFF00C853"
     return Color(int.parse(hex));
   }
 
@@ -112,7 +212,6 @@ class _PasswordAnalyzerScreenState extends State<PasswordAnalyzerScreen> {
               style: TextStyle(fontSize: 16, letterSpacing: 1.0),
             ),
             SizedBox(height: 18),
-            // Strength bar + label
             Row(
               children: [
                 Expanded(
@@ -141,7 +240,6 @@ class _PasswordAnalyzerScreenState extends State<PasswordAnalyzerScreen> {
               ],
             ),
             SizedBox(height: 18),
-            // Tiles
             _infoTile('Length', (_result['length'] ?? 0).toString()),
             _infoTile('Entropy (bits)', _result['entropy_bits']?.toString() ?? '0.00'),
             _infoTile('Crack time (GPU)', _result['crack_time_gpu_formatted'] ?? 'N/A'),
